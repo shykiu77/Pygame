@@ -27,43 +27,49 @@ def DrawTiles(DISPLAYSURF):
             pygame.draw.rect(DISPLAYSURF,BROWN if (i+j)%2 !=0 else GREY,Rect)
 
 def DrawPieces(board,DISPLAYSURF):
-    for i in range(0,8):
-        for j in range(0,8):
-            if board[i][j] != None:
+    for x in range(0,8):
+        for y in range(0,8):
+            if board[x][y] != None:
                 #pygame.draw.circle(DISPLAYSURF,board[i][j],(j*TILEWIDTH + (int) (TILEWIDTH/2),i*TILEHEIGHT+ (int)(TILEHEIGHT/2)),25)
-                pygame.gfxdraw.aacircle(DISPLAYSURF,j*TILEWIDTH + (int) (TILEWIDTH/2),i*TILEHEIGHT+ (int)(TILEHEIGHT/2),25,board[i][j])
-                #pygame.gfxdraw.filled_circle(DISPLAYSURF,j*TILEWIDTH + (int) (TILEWIDTH/2),i*TILEHEIGHT+ (int)(TILEHEIGHT/2),25,board[i][j])
+                pygame.gfxdraw.aacircle(DISPLAYSURF,x*TILEWIDTH + (int) (TILEWIDTH/2),y*TILEHEIGHT+ (int)(TILEHEIGHT/2),25,board[x][y])
+                pygame.gfxdraw.filled_circle(DISPLAYSURF,x*TILEWIDTH + (int) (TILEWIDTH/2),y*TILEHEIGHT+ (int)(TILEHEIGHT/2),25,board[x][y])
+
+def getTilePos(mousexy):
+    return ((int)(mousexy[0]/TILEWIDTH),(int)(mousexy[1]/TILEHEIGHT))
 
 def main():
     DISPLAYSURF.fill(WHITE)
     DrawTiles(DISPLAYSURF)
     board = []
     for i in range(0,8):
-        line = []
+        column = []
         for j in range(0,8):
-            if i <= 2 and (i+j)%2 != 0:
-                line.append(WHITE)
-            elif i >= WINDOWNWIDTH/TILEWIDTH - 3 and (i+j)%2 != 0:
-                line.append(BLACK)
+            if j <= 2 and (i+j)%2 != 0:
+                column.append(WHITE)
+            elif j >= WINDOWNWIDTH/TILEWIDTH - 3 and (i+j)%2 != 0:
+                column.append(BLACK)
             else:
-                line.append(None)
-        board.append(line)
+                column.append(None)
+        board.append(column)
     
     DrawPieces(board,DISPLAYSURF)
     
     pygame.display.update()
-    mousex = 0
-    mousey = 0
-   
-
+    moving_piece = (None,None)
+    moving = False
     while True:
         for event in pygame.event.get():
-            if event.type == MOUSEMOTION:
-                mousex,mousey = event.pos
-            
             if event.type == QUIT:
                 pygame.quit()
                 sys.exit()
+            elif event.type == MOUSEBUTTONUP:
+                click_location = getTilePos(event.pos)
+                if board[click_location[0]][click_location[1]] != None:
+                    moving_piece = click_location
+                    moving = True
+                elif moving == True:
+                    removame = None
+        
         pygame.display.update()
         FPSCLOCK.tick(FPS)
 
