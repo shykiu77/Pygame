@@ -80,6 +80,7 @@ def main():
     DrawPieces(board,DISPLAYSURF)
     
     pygame.display.update()
+    turn = WHITE
     moving_piece = (None,None)
     moving = False
     while True:
@@ -91,19 +92,21 @@ def main():
                 click_location = getTilePos(event.pos)
                 if board[click_location[0]][click_location[1]] != GREY:
                     if board[click_location[0]][click_location[1]] != None:
-                        if moving_piece == click_location:
-                            moving_piece = None
-                            moving = False
-                        else:
-                            moving_piece = click_location
-                            moving = True
-                        print('click ', click_location)
+                        if board[click_location[0]][click_location[1]] == turn:
+                            if moving_piece == click_location:
+                                moving_piece = None
+                                moving = False
+                            else:
+                                moving_piece = click_location
+                                moving = True
+                            print('click ', click_location)
                     elif moving == True:
                         if CheckMovement(board, moving_piece, click_location):
                             board = Move(board, moving_piece, click_location)
                             DrawTiles(DISPLAYSURF)
                             DrawPieces(board, DISPLAYSURF)
-                        removame = None
+                        moving = False
+                        turn = WHITE if turn == BLACK else BLACK
         
         pygame.display.update()
         FPSCLOCK.tick(FPS)
