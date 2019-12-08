@@ -37,6 +37,29 @@ def DrawPieces(board,DISPLAYSURF):
 def getTilePos(mousexy):
     return ((int)(mousexy[0]/TILEWIDTH),(int)(mousexy[1]/TILEHEIGHT))
 
+def CheckMovement(board, moving_piece, click_location):
+    x, y = moving_piece
+    j = 1
+    
+    if board[x][y] == BLACK:
+        j = -1
+
+    for i in (-1, 1):
+        if click_location == (x + i, y + j):
+            return True
+        elif board[x + i][y + j] != board[x][y] and click_location == (x + (2 * i), y + (2 * j)):
+            return True
+    return False
+
+def Move(board, moving_piece, click_location):
+    x, y = moving_piece
+    i, j = click_location
+    board[i][j] = board[x][y]
+    if board[(int)((x + i) / 2)][(int)((y + j) / 2)] != board[x][y]:
+        board[(int)((x + i) / 2)][(int)((y + j) / 2)] = None
+    board[x][y] = None
+    return board
+
 def main():
     DISPLAYSURF.fill(WHITE)
     DrawTiles(DISPLAYSURF)
@@ -66,20 +89,24 @@ def main():
                 sys.exit()
             elif event.type == MOUSEBUTTONUP:
                 click_location = getTilePos(event.pos)
-                if board[click_location[0]][click_location[1]] != None:
-                    if moving_piece == click_location:
-                        moving_piece = None
-                        moving = False
-                    else:
-                        moving_piece = click_location
-                        moving = True
-                    print('click ', click_location)
-                elif moving == True:
-                    removame = None
+                if board[click_location[0]][click_location[1]] != GREY:
+                    if board[click_location[0]][click_location[1]] != None:
+                        if moving_piece == click_location:
+                            moving_piece = None
+                            moving = False
+                        else:
+                            moving_piece = click_location
+                            moving = True
+                        print('click ', click_location)
+                    elif moving == True:
+                        if CheckMovement(board, moving_piece, click_location):
+                            board = Move(board, moving_piece, click_location)
+                            DrawTiles(DISPLAYSURF)
+                            DrawPieces(board, DISPLAYSURF)
+                        removame = None
         
         pygame.display.update()
         FPSCLOCK.tick(FPS)
-        print(moving_piece)
 
 if __name__ == '__main__':
     main()
