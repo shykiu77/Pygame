@@ -49,11 +49,21 @@ def heuristica(board):
                 whites += 1
     return whites - blacks
 
+
+
 def DFS(node):
     if node.children == []:
         node.score = heuristica(node.pattern)
         return node.score
-    
+    for children in node.children:
+        score = DFS(children)
+        if(node.score == None):
+            node.score = score
+        elif node.turn == BLACK:
+            node.score = score if score < node.score else node.score
+        else:
+            node.score = score if score > node.score else node.score
+    return node.score
 
 
 def main():
@@ -71,5 +81,6 @@ def main():
     root = Node(board,None,[],WHITE)
     GenerateTree(root,0)
     DFS(root)
+    print(root.score)
 if __name__ == '__main__':
     main()
