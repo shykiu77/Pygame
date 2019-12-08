@@ -45,10 +45,33 @@ def CheckMovement(board, moving_piece, click_location):
 
     for i in (-1, 1):
         if click_location == (x + i, y + j):
-            return True
-        if board[x + i][y + j] != board[x][y] and board[x + i][y + j] != None and click_location == (x + (2 * i), y + (2 * j)):
-            return True
-    return False
+            board = Move(board, moving_piece, click_location)
+            return board, True
+        if board[x + i][y + j] != board[x][y] and board[x + i][y + j] != None:
+            if click_location == (x + (2 * i), y + (2 * j)):
+                board = Move(board, moving_piece, click_location)
+                return board, True
+            if(CheckDoubleCaptura(board, (x + (2 * i), y + (2 * j)), click_location, board[x][y])):
+                board = Move(board, moving_piece, (x + (2 * i), y + (2 * j)))
+                return board, True
+    return board, False
+    
+def CheckDoubleCaptura(board, moving_piece, click_location, turn):
+    x, y = moving_piece
+    j = 1
+    if turn == BLACK:
+        j = -1
+
+    for i in (-1, 1):
+        if x + i > 0 and x + i < 8 and y + j > 0 and y + 1 < 8:
+            if board[x + i][y + j] != turn and board[x + i][y + j] != None:
+                if click_location == (x + (2 * i), y + (2 * j)):
+                    board = Move(board, moving_piece, click_location)
+                    return board, True
+                if CheckDoubleCaptura(board, (x + (2 * i), y + (2 * j)), click_location, turn):
+                    board = Move(board, moving_piece, click_location)
+                    return board, True
+    return board, False
 
 def Move(board, moving_piece, click_location):
     x, y = moving_piece
@@ -100,8 +123,8 @@ def main():
                                 moving = True
                             print('click ', click_location)
                     elif moving == True:
-                        if CheckMovement(board, moving_piece, click_location):
-                            board = Move(board, moving_piece, click_location)
+                        board, check = CheckMovement(board, moving_piece, click_location)
+                        if check:
                             DrawTiles(DISPLAYSURF)
                             DrawPieces(board, DISPLAYSURF)
                             moving = False
