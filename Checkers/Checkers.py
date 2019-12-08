@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-import pygame, sys
+import pygame, pygame.locals, pygame.gfxdraw, sys, copy
 from pygame.locals import *
-from pygame import gfxdraw
+# from pygame import gfxdraw
 
 FPS = 30
 WINDOWNWIDTH = 640
@@ -45,14 +45,15 @@ def CheckMovement(board, moving_piece, click_location):
 
     for i in (-1, 1):
         if click_location == (x + i, y + j):
-            board = Move(board, moving_piece, click_location)
+            board = Move(board, moving_piece, click_location, board[x][y], True)
             return board, True
         if board[x + i][y + j] != board[x][y] and board[x + i][y + j] != None:
             if click_location == (x + (2 * i), y + (2 * j)):
-                board = Move(board, moving_piece, click_location)
+                board = Move(board, moving_piece, click_location, board[x][y], True)
                 return board, True
-            if(CheckDoubleCaptura(board, (x + (2 * i), y + (2 * j)), click_location, board[x][y])):
-                board = Move(board, moving_piece, (x + (2 * i), y + (2 * j)))
+            board, check = CheckDoubleCaptura(board, (x + (2 * i), y + (2 * j)), click_location, board[x][y])
+            if(check):
+                board = Move(board, moving_piece, (x + (2 * i), y + (2 * j)), board[x][y], False)
                 return board, True
     return board, False
     
@@ -66,17 +67,19 @@ def CheckDoubleCaptura(board, moving_piece, click_location, turn):
         if x + i > 0 and x + i < 8 and y + j > 0 and y + 1 < 8:
             if board[x + i][y + j] != turn and board[x + i][y + j] != None:
                 if click_location == (x + (2 * i), y + (2 * j)):
-                    board = Move(board, moving_piece, click_location)
+                    board = Move(board, moving_piece, click_location, turn, True)
                     return board, True
-                if CheckDoubleCaptura(board, (x + (2 * i), y + (2 * j)), click_location, turn):
-                    board = Move(board, moving_piece, click_location)
-                    return board, True
+                if board[x + (2 * i)][y + (2 * j)] == None: 
+                    if CheckDoubleCaptura(board, (x + (2 * i), y + (2 * j)), click_location, turn):
+                        board = Move(board, moving_piece, click_location, turn, False)
+                        return board, True
     return board, False
 
-def Move(board, moving_piece, click_location):
+def Move(board, moving_piece, click_location, turn, last):
     x, y = moving_piece
     i, j = click_location
-    board[i][j] = board[x][y]
+    if last:
+        board[i][j] = turn
     if board[(int)((x + i) / 2)][(int)((y + j) / 2)] != board[x][y]:
         board[(int)((x + i) / 2)][(int)((y + j) / 2)] = None
     board[x][y] = None
@@ -104,6 +107,7 @@ def main():
     pygame.display.update()
     turn = WHITE
     moving_piece = (None,None)
+    undo = []
     moving = False
     while True:
         for event in pygame.event.get():
@@ -123,12 +127,21 @@ def main():
                                 moving = True
                             print('click ', click_location)
                     elif moving == True:
+                        last = copy.deepcopy(board)
                         board, check = CheckMovement(board, moving_piece, click_location)
                         if check:
                             DrawTiles(DISPLAYSURF)
                             DrawPieces(board, DISPLAYSURF)
+                            undo.append((last, turn))
                             moving = False
                             turn = WHITE if turn == BLACK else BLACK
+                elif click_location == (0, 0):
+                    print('desfazendo')
+                    board, turn = undo.pop()
+                    DrawTiles(DISPLAYSURF)
+                    DrawPieces(board, DISPLAYSURF)
+                    moving = False
+                    moving_piece = None
         
         pygame.display.update()
         FPSCLOCK.tick(FPS)
