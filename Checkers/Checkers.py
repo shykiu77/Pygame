@@ -29,7 +29,7 @@ def DrawTiles(DISPLAYSURF):
 def DrawPieces(board,DISPLAYSURF):
     for x in range(0,8):
         for y in range(0,8):
-            if board[x][y] != None:
+            if (x + y) % 2 == 1 and board[x][y] != None:
                 #pygame.draw.circle(DISPLAYSURF,board[i][j],(j*TILEWIDTH + (int) (TILEWIDTH/2),i*TILEHEIGHT+ (int)(TILEHEIGHT/2)),25)
                 pygame.gfxdraw.aacircle(DISPLAYSURF,x*TILEWIDTH + (int) (TILEWIDTH/2),y*TILEHEIGHT+ (int)(TILEHEIGHT/2),25,board[x][y])
                 pygame.gfxdraw.filled_circle(DISPLAYSURF,x*TILEWIDTH + (int) (TILEWIDTH/2),y*TILEHEIGHT+ (int)(TILEHEIGHT/2),25,board[x][y])
@@ -44,9 +44,11 @@ def main():
     for i in range(0,8):
         column = []
         for j in range(0,8):
-            if j <= 2 and (i+j)%2 != 0:
+            if (i+j)%2 == 0:
+                column.append(GREY)
+            elif j <= 2:
                 column.append(WHITE)
-            elif j >= WINDOWNWIDTH/TILEWIDTH - 3 and (i+j)%2 != 0:
+            elif j >= WINDOWNWIDTH/TILEWIDTH - 3:
                 column.append(BLACK)
             else:
                 column.append(None)
@@ -65,13 +67,19 @@ def main():
             elif event.type == MOUSEBUTTONUP:
                 click_location = getTilePos(event.pos)
                 if board[click_location[0]][click_location[1]] != None:
-                    moving_piece = click_location
-                    moving = True
+                    if moving_piece == click_location:
+                        moving_piece = None
+                        moving = False
+                    else:
+                        moving_piece = click_location
+                        moving = True
+                    print('click ', click_location)
                 elif moving == True:
                     removame = None
         
         pygame.display.update()
         FPSCLOCK.tick(FPS)
+        print(moving_piece)
 
 if __name__ == '__main__':
     main()
