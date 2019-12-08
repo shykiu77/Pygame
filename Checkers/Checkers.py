@@ -40,14 +40,13 @@ def getTilePos(mousexy):
 def CheckMovement(board, moving_piece, click_location):
     x, y = moving_piece
     j = 1
-    
     if board[x][y] == BLACK:
         j = -1
 
     for i in (-1, 1):
         if click_location == (x + i, y + j):
             return True
-        elif board[x + i][y + j] != board[x][y] and click_location == (x + (2 * i), y + (2 * j)):
+        if board[x + i][y + j] != board[x][y] and board[x + i][y + j] != None and click_location == (x + (2 * i), y + (2 * j)):
             return True
     return False
 
@@ -105,8 +104,8 @@ def main():
                             board = Move(board, moving_piece, click_location)
                             DrawTiles(DISPLAYSURF)
                             DrawPieces(board, DISPLAYSURF)
-                        moving = False
-                        turn = WHITE if turn == BLACK else BLACK
+                            moving = False
+                            turn = WHITE if turn == BLACK else BLACK
         
         pygame.display.update()
         FPSCLOCK.tick(FPS)
