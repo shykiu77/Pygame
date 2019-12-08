@@ -11,9 +11,7 @@ class Node:
         self.parent = parent
         self.children = children
         self.turn = turn
-    
-    
-
+        self.score = None
     
 
 def printBoard(board):
@@ -39,7 +37,24 @@ def GenerateTree(node,depth):
     node.children = GenerateMoves(node.pattern,BLACK if depth%2 == 0 else WHITE,node)
     for element in node.children:
         GenerateTree(element,depth+1)
+
+def heuristica(board):
+    whites = 0
+    blacks = 0
+    for i in range(0,8):
+        for j in range(0,8):
+            if board[i][j] == BLACK:
+                blacks += 1
+            if board[i][j] == WHITE:
+                whites += 1
+    return whites - blacks
+
+def DFS(node):
+    if node.children == []:
+        node.score = heuristica(node.pattern)
+        return node.score
     
+
 
 def main():
     board = []
@@ -55,6 +70,6 @@ def main():
         board.append(column)
     root = Node(board,None,[],WHITE)
     GenerateTree(root,0)
-    
+    DFS(root)
 if __name__ == '__main__':
     main()
